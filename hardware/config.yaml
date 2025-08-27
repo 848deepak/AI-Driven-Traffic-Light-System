@@ -1,0 +1,147 @@
+# Camera Configuration
+camera:
+  # Use 0 for webcam or IP camera URL like 'http://192.168.x.x:port/video'
+  source: 0
+  width: 640
+  height: 480
+  fps: 30
+
+# YOLOv8 Configuration
+model:
+  path: "model/yolov8n.pt"
+  confidence: 0.30  # Reduced confidence for better detection
+  # Classes we're interested in detecting (using actual COCO class names)
+  classes:
+    - car          # class 2
+    - motorcycle   # class 3 
+    - bus          # class 5
+    - truck        # class 7
+  # Skip frames to improve performance (1 = process every frame)
+  frame_skip: 2
+
+# Traffic Light Configuration
+traffic_light:
+  min_green_duration: 10
+  max_green_duration: 60
+  yellow_duration: 3
+  # Multiply by this value to calculate green light duration
+  vehicle_scale_factor: 2
+  # Moving average window size for vehicle count
+  count_window_size: 5
+
+# Lanes Configuration (polygon coordinates [x, y])
+# Larger lane polygons covering more area of the frame
+lanes:
+  left:
+    - [50, 480]    # Wider bottom-left
+    - [200, 80]    # Higher top-left
+    - [320, 80]    # Higher top-right
+    - [320, 480]   # Bottom-right
+  right:
+    - [320, 480]   # Bottom-left
+    - [320, 80]    # Higher top-left
+    - [440, 80]    # Higher top-right
+    - [590, 480]   # Wider bottom-right
+
+# Visual Settings
+visual_settings:
+  enable_lane_overlay: true
+  enable_vehicle_counts: true
+  enable_status_overlay: true
+
+# OCR Configuration for Emergency Text Detection
+ocr:
+  # Enable OCR detection for emergency texts
+  enabled: true
+  # Process every N frames for OCR
+  frame_skip: 5
+  # Minimum confidence threshold for text detection
+  confidence: 0.2
+  # Emergency keywords to look for (will be converted to lowercase for matching)
+  emergency_keywords:
+    - AMBULANCE
+    - FIRE
+    - POLICE
+    - EMERGENCY
+    - 911
+    - EMT
+    - PARAMEDIC
+    - RESCUE
+    - HOSPITAL
+    - EMS
+    - AMB
+    - MEDICAL
+    - "HELP"
+    - "SOS"
+    - "108"       # Indian emergency number
+    - "102"       # Indian ambulance number
+    - "101"       # Indian fire service number
+    - "100"       # Indian police number
+    - "AMBULAN"   # Partial match for AMBULANCE
+    - "AMBULA"
+    - "POLIC"     # Partial match for POLICE
+    - "एम्बुलेंस"  # Hindi for ambulance
+    - "पुलिस"      # Hindi for police
+    - "फायर"       # Hindi for fire
+
+# Emergency Vehicle Detection
+emergency_detection:
+  # Default class ids are not emergency vehicles, we'll use OCR for detection
+  class_names: []
+  # Enable custom detector to look for red/blue lights and markings
+  enable_color_detector: true
+  # Emergency vehicle light color detection (BGR format)
+  colors:
+    # Red lights (ambulance, fire truck)
+    - name: "red_light"
+      lower: [0, 0, 150]
+      upper: [100, 100, 255]
+    
+    # Blue lights (police)
+    - name: "blue_light" 
+      lower: [150, 50, 0]
+      upper: [255, 150, 80]
+    
+    # Bright red (fire truck)
+    - name: "bright_red"
+      lower: [30, 30, 180]
+      upper: [150, 150, 255]
+      
+    # Police blue
+    - name: "police_blue"
+      lower: [180, 80, 0]
+      upper: [255, 190, 100]
+      
+    # White vehicles (Indian ambulances)
+    - name: "white_vehicle"
+      lower: [180, 180, 180]
+      upper: [255, 255, 255]
+      
+    # White lights (common on all emergency vehicles)
+    - name: "white_light"
+      lower: [200, 200, 200]
+      upper: [255, 255, 255]
+      
+    # Yellow/amber lights (some ambulances)
+    - name: "amber_light"
+      lower: [0, 150, 200]
+      upper: [100, 255, 255]
+    
+    # Red vehicle color (fire trucks)
+    - name: "red_vehicle"
+      lower: [0, 0, 120]
+      upper: [80, 80, 255]
+  
+  # Minimum area for a color region to be considered
+  min_color_area: 40
+  # Minimum percentage of color needed in vehicle box to be considered emergency
+  emergency_color_threshold: 0.025
+  
+  # Indian specific settings
+  india_specific:
+    # White vehicle with red/blue stripe is likely ambulance
+    detect_ambulance_patterns: true
+    # Red vehicle is likely fire truck
+    detect_fire_truck_by_color: true
+    # Minimum white percentage to consider as potential ambulance
+    min_white_percentage: 0.5 
